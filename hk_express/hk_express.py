@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import testUtil
 import logging
 
-from hk_express import get_schedules, date_formate_conv
+from utils.hk_express_util import get_schedules, date_formate_conv
 
 
 def get_url(pa):
@@ -42,7 +42,6 @@ params = {"SearchType": "ONEWAY",
           "OriginStation": "HKG",
           "DestinationStation": "ICN",
           "DepartureDate": "5/9/2023"}
-
 
 
 def positive_or_negative(new_date, new_params):

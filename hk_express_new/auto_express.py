@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import hk_express
+from utils.hk_express_util import get_schedules, date_formate_conv
 import logging
 
 
@@ -51,35 +51,35 @@ def script_new(url, times):
         flights = browser.find_elements(By.CLASS_NAME, 'rowFlight')
         for f in flights:
             # each_schedule = f.find_element(By.CLASS_NAME, "custom-adjust-label-position")
-            hk_express.get_schedules(f, flight_date)
+            get_schedules(f, flight_date)
             print("")
         print("----------------------------------------------------------------------")
 
 
-def positive_or_negative(new_date, new_params):
-    times = 20
-    datestr = hk_express.date_formate_conv(new_date)
+def positive_or_negative(new_date, new_params, wait_time):
+    datestr = date_formate_conv(new_date)
     new_params["DepartureDate"] = datestr
     url = get_url(new_params)
     print(url)
     # 超时放大等待响应时间，再舱室两次
     try:
-        script_new(url, times)
+        script_new(url, wait_time)
     except Exception as e:
-        while times <= 30:
+        while wait_time <= 30:
             logging.error(e)
-            times = times + 5
-            script_new(url, times)
+            wait_time = wait_time + 5
+            script_new(url, wait_time)
 
 
 if __name__ == '__main__':
     from_city = "HKG"
     to_city = "ICN"
+    # 获取-3天和+3天的数据
     date = "2023-08-17"
     params["OriginStation"] = from_city
     params["DestinationStation"] = to_city
-    positive_or_negative(date, params)
+    positive_or_negative(date, params, 20)
 
     # back
     params["OriginStation"], params["DestinationStation"] = params["DestinationStation"], params["OriginStation"]
-    positive_or_negative(date, params)
+    positive_or_negative(date, params, 20)
