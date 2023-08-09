@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from utils.hk_express_util import get_schedules, date_formate_conv
+from utils.hk_express_util import get_schedules, date_formate_conv, create_form, add_info_to_form
 import logging
 
 
@@ -22,7 +22,7 @@ params = {"SearchType": "ONEWAY",
           "DepartureDate": "10/8/2023"}
 
 
-def script_new(url, times):
+def script_new(url, times, file_name, new_sheet, is_append):
     browser = webdriver.Chrome()
     browser.get(url)  # 访问网页
 
@@ -49,26 +49,26 @@ def script_new(url, times):
         schedule = browser.find_element(By.CLASS_NAME, 'dayselector').find_elements(By.TAG_NAME, "li")
 
         flights = browser.find_elements(By.CLASS_NAME, 'rowFlight')
+
         for f in flights:
             # each_schedule = f.find_element(By.CLASS_NAME, "custom-adjust-label-position")
-            get_schedules(f, flight_date)
-            print("")
-        print("----------------------------------------------------------------------")
+            # get_schedules(f, flight_date)
+            add_info_to_form(file_name, f, flight_date, new_sheet, is_append)
 
 
-def positive_or_negative(new_date, new_params, wait_time):
+def positive_or_negative(new_date, new_params, wait_time, file_name, new_sheet, is_append):
     datestr = date_formate_conv(new_date)
     new_params["DepartureDate"] = datestr
     url = get_url(new_params)
     print(url)
     # 超时放大等待响应时间，再舱室两次
     try:
-        script_new(url, wait_time)
+        script_new(url, wait_time, file_name, new_sheet, is_append)
     except Exception as e:
         while wait_time <= 30:
             logging.error(e)
             wait_time = wait_time + 5
-            script_new(url, wait_time)
+            script_new(url, wait_time, file_name, new_sheet, is_append)
 
 
 if __name__ == '__main__':
@@ -78,8 +78,15 @@ if __name__ == '__main__':
     date = "2023-08-17"
     params["OriginStation"] = from_city
     params["DestinationStation"] = to_city
-    positive_or_negative(date, params, 20)
+
+    excel_file_name = 'test.xlsx'
+    create_form(excel_file_name)
+
+    positive_or_negative(date, params, 20, excel_file_name, "GO", False)
+    print("----------------------------------------------------------------------")
 
     # back
     params["OriginStation"], params["DestinationStation"] = params["DestinationStation"], params["OriginStation"]
-    positive_or_negative(date, params, 20)
+    positive_or_negative(date, params, 20, excel_file_name, "RETURN", True)
+
+    print("###### CONGRATULATION ######")
