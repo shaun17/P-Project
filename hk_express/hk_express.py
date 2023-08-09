@@ -3,30 +3,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from datetime import datetime
 import testUtil
 import logging
 
-
-# 每个时间表详情
-def get_schedules(i):
-    print("起飞时间：", i.find_element(By.CLASS_NAME, "colDeparture").find_element(By.CLASS_NAME, "time").text)
-    print("起飞时间：",
-          i.find_element(By.CLASS_NAME, "colDeparture").find_element(By.CLASS_NAME, "airport-city").text)
-    print("起飞地点编码：",
-          i.find_element(By.CLASS_NAME, "colDeparture").find_element(By.CLASS_NAME, "airport-code").text)
-
-    print("飞行时间：", i.find_element(By.CLASS_NAME, "colDuration").find_element(By.CLASS_NAME, "time").text)
-
-    print("到达地点：", i.find_element(By.CLASS_NAME, "colReturn").find_element(By.CLASS_NAME, "time").text)
-    print("到达地点：", i.find_element(By.CLASS_NAME, "colReturn").find_element(By.CLASS_NAME, "airport-city").text)
-    print("到达地点编码：",
-          i.find_element(By.CLASS_NAME, "colReturn").find_element(By.CLASS_NAME, "airport-code").text)
-
-    print("金额：", i.find_element(By.CLASS_NAME, "colPrices").find_element(
-        By.CLASS_NAME, "price").text)
-    print("单位：", i.find_element(By.CLASS_NAME, "colPrices").find_element(
-        By.CLASS_NAME, "currency").text)
+from hk_express import get_schedules, date_formate_conv
 
 
 def get_url(pa):
@@ -37,7 +17,7 @@ def get_url(pa):
             pa.get("DepartureDate") + "&Adults=1&rediscoverbooking=false&")
 
 
-def script(original_url, wait_times):
+def script(original_url, wait_times, flight_date):
     browser = webdriver.Chrome()
     browser.get(original_url)  # 访问网页
 
@@ -54,7 +34,7 @@ def script(original_url, wait_times):
     flights = browser.find_elements(By.CLASS_NAME, 'rowFlight')
     for f in flights:
         # each_schedule = f.find_element(By.CLASS_NAME, "custom-adjust-label-position")
-        get_schedules(f)
+        get_schedules(f, flight_date)
         print("----------------------------------------------------------------------")
 
 
@@ -63,12 +43,6 @@ params = {"SearchType": "ONEWAY",
           "DestinationStation": "ICN",
           "DepartureDate": "5/9/2023"}
 
-
-def date_formate_conv(time_str):
-    # 将字符串解析成datetime对象 5/9/2023
-    dt = datetime.strptime(time_str, '%Y-%m-%d')
-    # 进行格式化
-    return dt.strftime('%-d/%-m/%Y')
 
 
 def positive_or_negative(new_date, new_params):
@@ -80,17 +54,17 @@ def positive_or_negative(new_date, new_params):
         print(url)
         # 超时放大等待响应时间，再舱室两次
         try:
-            script(url, times)
+            script(url, times, x)
         except Exception as e:
             while times <= 30:
                 logging.error(e)
                 times = times + 5
-                script(url, times)
+                script(url, times, x)
             continue
 
 
 if __name__ == '__main__':
-    dates = testUtil.get_date("2023-09-01", "2023-09-02")
+    dates = testUtil.get_date("2023-08-12", "2023-08-13")
     print(dates)
 
     from_city = "HKG"
