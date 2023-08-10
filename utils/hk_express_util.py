@@ -4,18 +4,24 @@ from datetime import datetime
 
 
 def create_form(excel_file_name):
-    form_header = ['出发城市', '出发时间', '航班号', '飞行时间', '到达地点', '到达时间', '金额']
-    df = pandas.DataFrame(columns=form_header)
+    df = get_df_from_write()
     df.to_excel(excel_file_name, index=False)
+
+
+def load_file(file_name):
+    return pandas.read_excel(file_name)
 
 
 def create_write(excel_file_name):
     return pandas.ExcelWriter(excel_file_name, mode="a", engine="openpyxl")
 
 
+def get_df_from_write():
+    form_header = ['出发城市', '出发时间', '航班号', '飞行时间', '到达地点', '到达时间', '金额']
+    return pandas.DataFrame(columns=form_header)
+
+
 def get_info_from_form(i, flight_date, infos):
-    # df = pandas.read_excel(excel_file_name)
-    # row_index = len(df) + 1  # 当前excel内容有几行
     takeoff_time = flight_date + " " + i.find_element(By.CLASS_NAME, "colDeparture").find_element(By.CLASS_NAME,
                                                                                                   "time").text
     takeoff_city = i.find_element(By.CLASS_NAME, "colDeparture").find_element(By.CLASS_NAME, "airport-city").text
@@ -29,9 +35,6 @@ def get_info_from_form(i, flight_date, infos):
     price = i.find_element(By.CLASS_NAME, "colPrices").find_element(
         By.CLASS_NAME, "price").text
     infos.append([takeoff_city, takeoff_time, flight_number, flight_time, arrive_city, arrive_time, price])
-
-    # df.loc[row_index] = [takeoff_city, takeoff_time, flight_number, flight_time, arrive_city, arrive_time, price]
-    # df.to_excel(excel_file_name, index=False, sheet_name=direction)
 
 
 # 每个时间表详情

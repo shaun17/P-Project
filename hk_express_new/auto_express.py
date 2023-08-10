@@ -1,13 +1,13 @@
+import logging
 import time
-import pandas
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from utils.hk_express_util import get_schedules, date_formate_conv, create_form, create_write, \
-    get_info_from_form
-import logging
+from selenium.webdriver.support.ui import WebDriverWait
+
+from utils.hk_express_util import date_formate_conv, create_form, create_write, \
+    get_info_from_form, get_df_from_write, load_file
 
 
 def get_url(pa):
@@ -53,26 +53,24 @@ def script_new(url, times, file_name, new_sheet, new_writer):
         flights = browser.find_elements(By.CLASS_NAME, 'rowFlight')
 
         for f in flights:
-            # each_schedule = f.find_element(By.CLASS_NAME, "custom-adjust-label-position")
-            # get_schedules(f, flight_date)
             get_info_from_form(f, flight_date, infos)
 
     print(infos)
     if new_writer:
-        form_header = ['出发城市', '出发时间', '航班号', '飞行时间', '到达地点', '到达时间', '金额']
-        df = pandas.DataFrame(columns=form_header)
-        row_index = len(df) + 1  # 当前excel内容有几行
-        for x in range(len(infos)):
-            df.loc[row_index] = infos[x]
-            row_index = row_index + 1
+        df = get_df_from_write()
+        foreach_everyone(df, infos)
         df.to_excel(new_writer, index=False, sheet_name=new_sheet)
     else:
-        df = pandas.read_excel(file_name)
-        row_index = len(df) + 1  # 当前excel内容有几行
-        for x in range(len(infos)):
-            df.loc[row_index] = infos[x]
-            row_index = row_index + 1
+        df = load_file(excel_file_name)
+        foreach_everyone(df, infos)
         df.to_excel(excel_file_name, index=False, sheet_name=new_sheet)
+
+
+def foreach_everyone(df, infos):
+    row_index = len(df) + 1  # 当前excel内容有几行
+    for x in range(len(infos)):
+        df.loc[row_index] = infos[x]
+        row_index = row_index + 1
 
 
 def positive_or_negative(new_date, new_params, wait_time, file_name, new_sheet, new_writer):
@@ -104,8 +102,9 @@ if __name__ == '__main__':
     positive_or_negative(date, params, 20, excel_file_name, "GO", None)
     print("----------------------------------------------------------------------")
 
+    # flight return
+    # use `write` to load file and create a new sheet
     writer = create_write(excel_file_name)
-    # back
     params["OriginStation"], params["DestinationStation"] = params["DestinationStation"], params["OriginStation"]
     positive_or_negative(date, params, 20, excel_file_name, "RETURN", writer)
     writer.close()
