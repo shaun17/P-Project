@@ -1,10 +1,12 @@
 import time
+import pandas
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from utils.hk_express_util import get_schedules, date_formate_conv, create_form, add_info_to_form
+from utils.hk_express_util import get_schedules, date_formate_conv, create_form, create_write, \
+    get_info_from_form
 import logging
 
 
@@ -22,7 +24,7 @@ params = {"SearchType": "ONEWAY",
           "DepartureDate": "10/8/2023"}
 
 
-def script_new(url, times, file_name, new_sheet, is_append):
+def script_new(url, times, file_name, new_sheet, new_writer):
     browser = webdriver.Chrome()
     browser.get(url)  # 访问网页
 
@@ -33,7 +35,7 @@ def script_new(url, times, file_name, new_sheet, is_append):
 
     # 先获取时间区间，用于下面遍历每天的航班信息
     schedule = browser.find_element(By.CLASS_NAME, 'dayselector').find_elements(By.TAG_NAME, "li")
-
+    infos = []
     for i in range(len(schedule)):
         flight_date = schedule[i].find_element(By.CLASS_NAME, "date").text
         print(" ————————————")
@@ -53,22 +55,39 @@ def script_new(url, times, file_name, new_sheet, is_append):
         for f in flights:
             # each_schedule = f.find_element(By.CLASS_NAME, "custom-adjust-label-position")
             # get_schedules(f, flight_date)
-            add_info_to_form(file_name, f, flight_date, new_sheet, is_append)
+            get_info_from_form(f, flight_date, infos)
+
+    print(infos)
+    if new_writer:
+        form_header = ['出发城市', '出发时间', '航班号', '飞行时间', '到达地点', '到达时间', '金额']
+        df = pandas.DataFrame(columns=form_header)
+        row_index = len(df) + 1  # 当前excel内容有几行
+        for x in range(len(infos)):
+            df.loc[row_index] = infos[x]
+            row_index = row_index + 1
+        df.to_excel(new_writer, index=False, sheet_name=new_sheet)
+    else:
+        df = pandas.read_excel(file_name)
+        row_index = len(df) + 1  # 当前excel内容有几行
+        for x in range(len(infos)):
+            df.loc[row_index] = infos[x]
+            row_index = row_index + 1
+        df.to_excel(excel_file_name, index=False, sheet_name=new_sheet)
 
 
-def positive_or_negative(new_date, new_params, wait_time, file_name, new_sheet, is_append):
+def positive_or_negative(new_date, new_params, wait_time, file_name, new_sheet, new_writer):
     datestr = date_formate_conv(new_date)
     new_params["DepartureDate"] = datestr
     url = get_url(new_params)
     print(url)
     # 超时放大等待响应时间，再舱室两次
     try:
-        script_new(url, wait_time, file_name, new_sheet, is_append)
+        script_new(url, wait_time, file_name, new_sheet, new_writer)
     except Exception as e:
         while wait_time <= 30:
             logging.error(e)
             wait_time = wait_time + 5
-            script_new(url, wait_time, file_name, new_sheet, is_append)
+            script_new(url, wait_time, file_name, new_sheet, new_writer)
 
 
 if __name__ == '__main__':
@@ -82,11 +101,12 @@ if __name__ == '__main__':
     excel_file_name = 'test.xlsx'
     create_form(excel_file_name)
 
-    positive_or_negative(date, params, 20, excel_file_name, "GO", False)
+    positive_or_negative(date, params, 20, excel_file_name, "GO", None)
     print("----------------------------------------------------------------------")
 
+    writer = create_write(excel_file_name)
     # back
     params["OriginStation"], params["DestinationStation"] = params["DestinationStation"], params["OriginStation"]
-    positive_or_negative(date, params, 20, excel_file_name, "RETURN", True)
-
+    positive_or_negative(date, params, 20, excel_file_name, "RETURN", writer)
+    writer.close()
     print("###### CONGRATULATION ######")
