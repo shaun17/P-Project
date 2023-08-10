@@ -67,3 +67,21 @@ def date_formate_conv(time_str):
     dt = datetime.strptime(time_str, '%Y-%m-%d')
     # 进行格式化
     return dt.strftime('%-d/%-m/%Y')
+
+
+def to_excel_auto_column_weight(df, sheet_name, p_writer):
+    #  计算表头的字符宽度
+    column_widths = (
+        df.columns.to_series().apply(lambda x: len(x.encode('gbk'))).values
+    )
+    #  计算每列的最大字符宽度
+    max_widths = (
+        df.astype(str).applymap(lambda x: len(x.encode('gbk'))).agg(max).values
+    )
+    # 计算整体最大宽度
+    widths = np.max([column_widths, max_widths], axis=0)
+    # 设置列宽
+    worksheet = p_writer.sheets[sheet_name]
+    for i, width in enumerate(widths, 1):
+        # openpyxl引擎设置字符宽度时会缩水0.5左右个字符，所以干脆+2使左右都空出一个字宽。
+        worksheet.column_dimensions[get_column_letter(i)].width = width + 2

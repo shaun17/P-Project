@@ -1,13 +1,14 @@
 import logging
 import time
 
+from openpyxl.utils import get_column_letter
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
+import numpy as np
 from utils.hk_express_util import date_formate_conv, create_form, create_write, \
-    get_info_from_form, get_df_from_write, load_file
+    get_info_from_form, get_df_from_write, load_file, to_excel_auto_column_weight
 
 
 def get_url(pa):
@@ -107,5 +108,12 @@ if __name__ == '__main__':
     writer = create_write(excel_file_name)
     params["OriginStation"], params["DestinationStation"] = params["DestinationStation"], params["OriginStation"]
     positive_or_negative(date, params, 20, excel_file_name, "RETURN", writer)
+
+    # reload file, adjust column weight
+    df = load_file(excel_file_name)
+    for x in ["GO", "RETURN"]:
+        to_excel_auto_column_weight(df, x, writer)
+
     writer.close()
-    print("###### CONGRATULATION ######")
+    print("")
+    print("###### CONGRATULATION !!! ######")
