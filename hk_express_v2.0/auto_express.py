@@ -6,17 +6,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from utils.hk_express_util import date_formate_conv, create_form, create_write, \
-    get_info_from_form, get_df_from_write, load_file, to_excel_auto_column_weight
-
-
-def get_url(pa):
-    return ("https://booking.hkexpress.com/zh-cn/select/?SearchType=" +
-            pa.get("SearchType") + "&OriginStation=" +
-            pa.get("OriginStation") + "&DestinationStation=" +
-            pa.get("DestinationStation") + "&DepartureDate=" +
-            pa.get("DepartureDate") + "&Adults=1&rediscoverbooking=false&")
-
+from utils.hk_express_util import date_formate_conv, create_excel_file, create_write, \
+    get_info_from_form, get_df_from_write, load_file, to_excel_auto_column_weight, get_url
 
 params = {"SearchType": "ONEWAY",
           "OriginStation": "HKG",
@@ -97,7 +88,7 @@ if __name__ == '__main__':
     params["DestinationStation"] = to_city
 
     excel_file_name = 'test.xlsx'
-    create_form(excel_file_name)
+    create_excel_file(excel_file_name)
 
     positive_or_negative(date, params, 20, excel_file_name, "GO", None)
     print("----------------------------------------------------------------------")

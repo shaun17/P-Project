@@ -1,9 +1,19 @@
+import numpy as np
 import pandas
+from openpyxl.utils import get_column_letter
 from selenium.webdriver.common.by import By
 from datetime import datetime
 
 
-def create_form(excel_file_name):
+def get_url(pa):
+    return ("https://booking.hkexpress.com/zh-cn/select/?SearchType=" +
+            pa.get("SearchType") + "&OriginStation=" +
+            pa.get("OriginStation") + "&DestinationStation=" +
+            pa.get("DestinationStation") + "&DepartureDate=" +
+            pa.get("DepartureDate") + "&Adults=1&rediscoverbooking=false&")
+
+
+def create_excel_file(excel_file_name):
     df = get_df_from_write()
     df.to_excel(excel_file_name, index=False)
 

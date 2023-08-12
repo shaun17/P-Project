@@ -6,15 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 import testUtil
 import logging
 
-from utils.hk_express_util import get_schedules, date_formate_conv
-
-
-def get_url(pa):
-    return ("https://booking.hkexpress.com/zh-cn/select/?SearchType=" +
-            pa.get("SearchType") + "&OriginStation=" +
-            pa.get("OriginStation") + "&DestinationStation=" +
-            pa.get("DestinationStation") + "&DepartureDate=" +
-            pa.get("DepartureDate") + "&Adults=1&rediscoverbooking=false&")
+from utils.date_util import date_formate_conv_whithout_0
+from utils.hk_express_util import get_schedules, get_url
 
 
 def script(original_url, wait_times, flight_date):
@@ -47,7 +40,7 @@ params = {"SearchType": "ONEWAY",
 def positive_or_negative(new_date, new_params):
     for x in new_date:
         times = 20
-        datestr = date_formate_conv(x)
+        datestr = date_formate_conv_whithout_0(x)
         new_params["DepartureDate"] = datestr
         url = get_url(new_params)
         print(url)
