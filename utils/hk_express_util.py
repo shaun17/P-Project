@@ -95,3 +95,21 @@ def to_excel_auto_column_weight(df, sheet_name, p_writer):
     for i, width in enumerate(widths, 1):
         # openpyxl引擎设置字符宽度时会缩水0.5左右个字符，所以干脆+2使左右都空出一个字宽。
         worksheet.column_dimensions[get_column_letter(i)].width = width + 2
+
+
+def save_excel_file(infos, new_sheet, writer, file_name):
+    if writer:
+        df = get_df_from_write()
+        foreach_everyone(df, infos)
+        df.to_excel(writer, index=False, sheet_name=new_sheet)
+    else:
+        df = load_file(file_name)
+        foreach_everyone(df, infos)
+        df.to_excel(file_name, index=False, sheet_name=new_sheet)
+
+
+def foreach_everyone(dataformat, infos):
+    row_index = len(dataformat) + 1  # 当前excel内容有几行
+    for index in range(len(infos)):
+        dataformat.loc[row_index] = infos[index]
+        row_index = row_index + 1

@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils.hk_express_util import date_formate_conv, create_excel_file, create_write, \
-    get_info_from_form, get_df_from_write, load_file, to_excel_auto_column_weight, get_url
+    get_info_from_form, load_file, to_excel_auto_column_weight, get_url, save_excel_file
 
 params = {"SearchType": "ONEWAY",
           "OriginStation": "HKG",
@@ -47,21 +47,7 @@ def script_new(url, times, file_name, new_sheet, new_writer):
             get_info_from_form(f, flight_date, infos)
 
     print(infos)
-    if new_writer:
-        df = get_df_from_write()
-        foreach_everyone(df, infos)
-        df.to_excel(new_writer, index=False, sheet_name=new_sheet)
-    else:
-        df = load_file(excel_file_name)
-        foreach_everyone(df, infos)
-        df.to_excel(excel_file_name, index=False, sheet_name=new_sheet)
-
-
-def foreach_everyone(df, infos):
-    row_index = len(df) + 1  # 当前excel内容有几行
-    for x in range(len(infos)):
-        df.loc[row_index] = infos[x]
-        row_index = row_index + 1
+    save_excel_file(infos, new_sheet, new_writer, file_name)
 
 
 def positive_or_negative(new_date, new_params, wait_time, file_name, new_sheet, new_writer):
@@ -87,7 +73,7 @@ if __name__ == '__main__':
     params["OriginStation"] = from_city
     params["DestinationStation"] = to_city
 
-    excel_file_name = 'test.xlsx'
+    excel_file_name = from_city + "_" + to_city + "_" + time.time().__str__() + ".xlsx"
     create_excel_file(excel_file_name)
 
     positive_or_negative(date, params, 20, excel_file_name, "GO", None)
