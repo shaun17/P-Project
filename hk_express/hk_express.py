@@ -34,6 +34,7 @@ def script(original_url, wait_times, flight_date):
 params = {"SearchType": "ONEWAY",
           "OriginStation": "HKG",
           "DestinationStation": "ICN",
+          "Adults": 1,
           "DepartureDate": "5/9/2023"}
 
 

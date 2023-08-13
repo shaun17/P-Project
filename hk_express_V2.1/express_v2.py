@@ -13,6 +13,7 @@ from utils.hk_express_util import create_excel_file, create_write, \
 
 params = {"SearchType": "ONEWAY",
           "OriginStation": "HKG",
+          "Adults": "1",
           "DestinationStation": "ICN",
           "DepartureDate": "10/8/2023"}
 
@@ -94,7 +95,7 @@ if __name__ == '__main__':
     from_city = "HKG"
     to_city = "ICN"
     stay_days = 2
-    s_date = "2023-08-17"
+    s_date = "2023-08-27"
     e_date = "2023-09-01"
 
     dates = [datetime.datetime.strptime(s_date, "%Y-%m-%d"),

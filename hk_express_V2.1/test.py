@@ -1,16 +1,43 @@
 import datetime
 import time
 
-time1 = datetime.datetime.strptime('2022-05-09', '%Y-%m-%d')
-print(time1.strftime('%d/%m/%Y'))
-print(type(time1))
-three_days_later = time1 + datetime.timedelta(days=3)
+from utils.exchange_rate import exchange_rate_configs
 
-print(three_days_later)
-time2 = datetime.datetime.strptime('14/08/2023', '%d/%m/%Y')
-print(time2)
-print(time2.__str__())
-print(type(time2))
-print(type(time2.__str__()))
+
+def test():
+    time1 = datetime.datetime.strptime('2022-05-09', '%Y-%m-%d')
+    print(time1.strftime('%d/%m/%Y'))
+    print(type(time1))
+    three_days_later = time1 + datetime.timedelta(days=3)
+
+    print(three_days_later)
+    time2 = datetime.datetime.strptime('14/08/2023', '%d/%m/%Y')
+    print(time2)
+    print(time2.__str__())
+    print(type(time2))
+    print(type(time2.__str__()))
+
+
+infos = [['香港国际机场', '27/08/2023 07:15', 'UO618', '\n3h 35m', '仁川国际机场', '11:50', '908', 'HKD'],
+         ['香港国际机场', '27/08/2023 09:10', 'UO630', '\n3h 40m', '仁川国际机场', '13:50', '1,568', 'HKD'],
+         ['香港国际机场', '27/08/2023 16:50', 'UO626', '\n3h 45m', '仁川国际机场', '21:35', '908', 'HKD'],
+         ['香港国际机场', '28/08/2023 07:15', 'UO618', '\n3h 35m', '仁川国际机场', '11:50', '1,088', 'HKD'],
+         ['香港国际机场', '28/08/2023 10:40', 'UO630', '\n3h 40m', '仁川国际机场', '15:20', '已客满', None],
+         ['香港国际机场', '28/08/2023 16:50', 'UO626', '\n3h 45m', '仁川国际机场', '21:35', '758', 'HKD'],
+         ['香港国际机场', '29/08/2023 07:15', 'UO618', '\n3h 35m', '仁川国际机场', '11:50', '758', 'HKD'],
+         ['香港国际机场', '29/08/2023 16:50', 'UO626', '\n3h 45m', '仁川国际机场', '21:35', '628', 'HKD'],
+         ['香港国际机场', '30/08/2023 07:15', 'UO618', '\n3h 35m', '仁川国际机场', '11:50', '578', 'HKD'],
+         ['香港国际机场', '30/08/2023 10:40', 'UO630', '\n3h 40m', '仁川国际机场', '15:20', '908', 'HKD'],
+         ['香港国际机场', '30/08/2023 16:50', 'UO626', '\n3h 45m', '仁川国际机场', '21:35', '578', 'HKD'],
+         ['香港国际机场', '31/08/2023 07:15', 'UO618', '\n3h 35m', '仁川国际机场', '11:50', '928', 'HKD'],
+         ['香港国际机场', '31/08/2023 10:40', 'UO630', '\n3h 40m', '仁川国际机场', '15:20', '1,108', 'HKD'],
+         ['香港国际机场', '31/08/2023 16:50', 'UO626', '\n3h 45m', '仁川国际机场', '21:35', '508', 'HKD'],
+         ['香港国际机场', '01/09/2023 07:15', 'UO618', '\n3h 35m', '仁川国际机场', '11:50', '1,588', 'HKD'],
+         ['香港国际机场', '01/09/2023 16:50', 'UO626', '\n3h 45m', '仁川国际机场', '21:35', '758', 'HKD']]
+
+def test1():
+    re = list(filter(lambda info: info[-1] is not None, infos))[-1]
+    rate = exchange_rate_configs(re[-1])
+    print(rate)
 
 

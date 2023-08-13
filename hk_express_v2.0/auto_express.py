@@ -11,6 +11,7 @@ from utils.hk_express_util import date_formate_conv, create_excel_file, create_w
 
 params = {"SearchType": "ONEWAY",
           "OriginStation": "HKG",
+          "Adults": "1",
           "DestinationStation": "ICN",
           "DepartureDate": "10/8/2023"}
 

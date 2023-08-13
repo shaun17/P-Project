@@ -1,8 +1,12 @@
+import re
+
 import numpy as np
 import pandas
 from openpyxl.utils import get_column_letter
 from selenium.webdriver.common.by import By
 from datetime import datetime
+
+from utils.exchange_rate import exchange_rate_configs
 
 
 def get_url(pa):
@@ -10,7 +14,8 @@ def get_url(pa):
             pa.get("SearchType") + "&OriginStation=" +
             pa.get("OriginStation") + "&DestinationStation=" +
             pa.get("DestinationStation") + "&DepartureDate=" +
-            pa.get("DepartureDate") + "&Adults=1&rediscoverbooking=false&")
+            pa.get("DepartureDate") + "&Adults=" +
+            pa.get("Adults") + "&rediscoverbooking=false&")
 
 
 def create_excel_file(excel_file_name):
@@ -27,7 +32,7 @@ def create_write(excel_file_name):
 
 
 def get_df_from_write():
-    form_header = ['出发城市', '出发时间', '航班号', '飞行时间', '到达地点', '到达时间', '金额']
+    form_header = ['出发城市', '出发时间', '航班号', '飞行时间', '到达地点', '到达时间', '金额', '结汇']
     return pandas.DataFrame(columns=form_header)
 
 
@@ -44,7 +49,11 @@ def get_info_from_form(i, flight_date, infos):
     arrive_time = i.find_element(By.CLASS_NAME, "colReturn").find_element(By.CLASS_NAME, "time").text
     price = i.find_element(By.CLASS_NAME, "colPrices").find_element(
         By.CLASS_NAME, "price").text
-    infos.append([takeoff_city, takeoff_time, flight_number, flight_time, arrive_city, arrive_time, price])
+    exchange = None
+    if not '已客满' == price:
+        exchange = i.find_element(By.CLASS_NAME, "colPrices").find_element(
+            By.CLASS_NAME, "currency").text
+    infos.append([takeoff_city, takeoff_time, flight_number, flight_time, arrive_city, arrive_time, price, exchange])
 
 
 # 每个时间表详情
@@ -98,18 +107,27 @@ def to_excel_auto_column_weight(df, sheet_name, p_writer):
 
 
 def save_excel_file(infos, new_sheet, writer, file_name):
+    print(infos)
+    result = list(filter(lambda info: info[-1] is not None, infos))[-1]
+    rate = exchange_rate_configs(result[-1])
     if writer:
         df = get_df_from_write()
-        foreach_everyone(df, infos)
+        foreach_everyone(df, infos, rate)
         df.to_excel(writer, index=False, sheet_name=new_sheet)
     else:
         df = load_file(file_name)
-        foreach_everyone(df, infos)
+        foreach_everyone(df, infos, rate)
         df.to_excel(file_name, index=False, sheet_name=new_sheet)
 
 
-def foreach_everyone(dataformat, infos):
+def foreach_everyone(dataformat, infos, rate):
     row_index = len(dataformat) + 1  # 当前excel内容有几行
     for index in range(len(infos)):
-        dataformat.loc[row_index] = infos[index]
+        info = infos[index]
+        if not '已客满' == info[-2]:
+            number = float(re.sub(r'[^\d.]', '', info[-2]))
+            info[-1] = number * float(rate)
+        else:
+            info[-1] = None
+        dataformat.loc[row_index] = info
         row_index = row_index + 1
