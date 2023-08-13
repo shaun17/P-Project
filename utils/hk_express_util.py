@@ -32,7 +32,7 @@ def create_write(excel_file_name):
 
 
 def get_df_from_write():
-    form_header = ['出发城市', '出发时间', '航班号', '飞行时间', '到达地点', '到达时间', '金额', '结汇']
+    form_header = ['出发城市', '出发时间', '航班号', '飞行时间', '到达地点', '到达时间', '金额', '结汇换算(人名币)']
     return pandas.DataFrame(columns=form_header)
 
 

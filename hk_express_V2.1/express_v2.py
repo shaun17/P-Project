@@ -63,7 +63,6 @@ def script_new(browser, date, url, times, new_sheet, new_writer, file_name):
 
         # 先获取时间区间，用于下面遍历每天的航班信息
         schedule = browser.find_element(By.CLASS_NAME, 'dayselector').find_elements(By.TAG_NAME, "li")
-        print(schedule)
         flag = find_all(schedule, sets, start_date, end_date, browser, infos)
         if not flag:
             break
@@ -107,7 +106,6 @@ if __name__ == '__main__':
     create_excel_file(excel_file_name)
 
     positive_or_negative(dates, params, 20, "GO", None)
-    print("----------------------------------------------------------------------")
 
     # flight return
     # use `write` to load file and create a new sheet
